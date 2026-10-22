@@ -37,37 +37,12 @@ declare
   v_number bigint;
   v_event uuid;
 begin
-  if v_name = '' or length(v_name) > 120 then
-    raise exception 'dados_invalidos:nome';
-  end if;
-  if length(v_phone) < 10 or length(v_phone) > 13 then
-    raise exception 'dados_invalidos:telefone';
-  end if;
-  if v_fulfillment not in ('pickup', 'delivery') then
-    raise exception 'dados_invalidos:recebimento';
-  end if;
-  if v_fulfillment = 'delivery' and (
-    coalesce(btrim(v_address ->> 'street'), '') = ''
-    or coalesce(btrim(v_address ->> 'number'), '') = ''
-    or coalesce(btrim(v_address ->> 'district'), '') = ''
-    or coalesce(btrim(v_address ->> 'city'), '') = ''
-  ) then
-    raise exception 'dados_invalidos:endereco';
-  end if;
   if jsonb_typeof(p -> 'items') is distinct from 'array'
      or jsonb_array_length(p -> 'items') = 0
      or jsonb_array_length(p -> 'items') > 50 then
     raise exception 'dados_invalidos:itens';
   end if;
 
-  -- anti-spam: no máximo 5 pedidos em 10 minutos por telefone ou IP
-  if (
-    select count(*) from public.order_attempts a
-    where a.created_at > now() - interval '10 minutes'
-      and (a.phone = v_phone or (v_ip is not null and a.ip = v_ip))
-  ) >= 5 then
-    raise exception 'muitas_tentativas';
-  end if;
 
   for v_item in select * from jsonb_array_elements(p -> 'items') loop
     v_qty := coalesce((v_item ->> 'quantity')::int, 0);
@@ -162,6 +137,39 @@ begin
   end if;
 
   v_total := v_subtotal - v_discount;
+
+  -- cotação: devolve as linhas e totais calculados, sem gravar nada
+  if coalesce((p ->> 'dry_run')::boolean, false) then
+    return jsonb_build_object('dry_run', true, 'lines', v_lines, 'subtotal', v_subtotal,
+      'discount', v_discount, 'total', v_total, 'coupon_code', v_coupon_code);
+  end if;
+
+  if v_name = '' or length(v_name) > 120 then
+    raise exception 'dados_invalidos:nome';
+  end if;
+  if length(v_phone) < 10 or length(v_phone) > 13 then
+    raise exception 'dados_invalidos:telefone';
+  end if;
+  if v_fulfillment not in ('pickup', 'delivery') then
+    raise exception 'dados_invalidos:recebimento';
+  end if;
+  if v_fulfillment = 'delivery' and (
+    coalesce(btrim(v_address ->> 'street'), '') = ''
+    or coalesce(btrim(v_address ->> 'number'), '') = ''
+    or coalesce(btrim(v_address ->> 'district'), '') = ''
+    or coalesce(btrim(v_address ->> 'city'), '') = ''
+  ) then
+    raise exception 'dados_invalidos:endereco';
+  end if;
+  -- anti-spam: no máximo 5 pedidos em 10 minutos por telefone ou IP
+  if (
+    select count(*) from public.order_attempts a
+    where a.created_at > now() - interval '10 minutes'
+      and (a.phone = v_phone or (v_ip is not null and a.ip = v_ip))
+  ) >= 5 then
+    raise exception 'muitas_tentativas';
+  end if;
+
 
   insert into public.orders (
     id, customer_name, customer_phone, customer_email, fulfillment, address,

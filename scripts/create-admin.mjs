@@ -50,7 +50,13 @@ for (const email of emails) {
   })
   if (error) {
     if (/already|registered|exists/i.test(error.message)) {
-      console.log(`• ${email}: já existe (nada alterado)`)
+      // usuário já existe: só garante o cadastro em public.admins (senha e metadados ficam como estão)
+      const { data: list } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+      const found = list?.users.find((u) => u.email?.toLowerCase() === email)
+      if (found) {
+        await supabase.from('admins').upsert({ user_id: found.id })
+        console.log(`• ${email}: já existia; garantido como admin (senha não alterada)`)
+      }
       continue
     }
     console.error(`✗ ${email}: ${error.message}`)

@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
+/* Tema padrão (identidade do logo). Em runtime o admin sobrescreve via store_settings.theme. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --c-dark: #1f130d;
+  --c-primary: #8c4a24;
+  --c-secondary: #2e4a3a;
+  --c-accent: #c8a27c;
+  --c-light: #f4ece1;
+  --c-text: #2a1d16;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-dark: var(--c-dark);
+  --color-primary: var(--c-primary);
+  --color-secondary: var(--c-secondary);
+  --color-accent: var(--c-accent);
+  --color-light: var(--c-light);
+  --color-ink: var(--c-text);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--c-light);
+  color: var(--c-text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-title {
+  font-family: var(--font-cormorant), Georgia, serif;
+  letter-spacing: 0.04em;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--c-primary);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--c-primary) 85%, black);
+}
+.btn-outline {
+  border: 1px solid var(--c-primary);
+  color: var(--c-primary);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--c-primary);
+  color: #fff;
+}
+.btn-danger {
+  border: 1px solid #b3261e;
+  color: #b3261e;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #b3261e;
+  color: #fff;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--c-text) 25%, transparent);
+  background: #fff;
+  border-radius: 0.375rem;
+  padding: 0.6rem 0.8rem;
+  color: var(--c-text);
+}
+.input:focus {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 1px;
+}
+.label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.card {
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--c-text) 12%, transparent);
+  border-radius: 0.5rem;
+}
+.container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-inline: 1rem;
 }
