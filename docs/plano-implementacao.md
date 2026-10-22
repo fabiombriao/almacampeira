@@ -75,19 +75,19 @@ Todas as tabelas com RLS ligado. Leitura pública só do que a vitrine precisa; 
 
 ## 6. Etapas de entrega
 
-| # | Etapa | Entrega |
-|---|---|---|
-| 0 | Setup | Projeto Next.js, Tailwind, projeto Supabase, variáveis de ambiente, repositório |
-| 1 | Banco | Migrations, RLS, `is_admin()`, RPCs, seed de exemplo |
-| 2 | Admin base | Login, layout, tela de Loja/WhatsApp |
-| 3 | Catálogo (admin) | Categorias, produtos, variantes, upload de imagens |
-| 4 | Vitrine | Home, categoria, produto, carrinho |
-| 5 | Checkout | Formulário, `create_order`, redirecionamento ao WhatsApp, página do pedido |
-| 6 | Pedidos (admin) | Lista, detalhe, confirmar/cancelar/entregar, baixa de estoque |
-| 7 | Cupons | CRUD no admin + aplicação no checkout |
-| 8 | Aparência | Tema, banners, textos |
-| 9 | Conversões | Pixel + CAPI Meta, GA4 MP, painel de integrações |
-| 10 | Deploy e QA | Vercel, domínio, teste ponta a ponta no celular |
+| # | Etapa | Entrega | Status |
+|---|---|---|---|
+| 0 | Setup | Projeto Next.js, Tailwind, projeto Supabase, variáveis de ambiente, repositório | ✅ |
+| 1 | Banco | Migrations, RLS, `is_admin()`, RPCs, seed de exemplo | ✅ testado (10 testes no banco) |
+| 2 | Admin base | Login, layout, tela de Loja/WhatsApp, troca de senha obrigatória | ✅ |
+| 3 | Catálogo (admin) | Categorias, produtos, variantes, upload de imagens | ✅ e2e com upload real |
+| 4 | Vitrine | Home, categoria, produto, carrinho | ✅ e2e desktop e mobile |
+| 5 | Checkout | Formulário, `create_order`, redirecionamento ao WhatsApp, página do pedido | ✅ e2e (mensagem conferida) |
+| 6 | Pedidos (admin) | Lista, detalhe, confirmar/cancelar/entregar, baixa de estoque | ✅ e2e (estoque 10 → 9) |
+| 7 | Cupons | CRUD no admin + aplicação no checkout | ✅ e2e |
+| 8 | Aparência | Tema, banners, textos | ✅ (telas renderizam; edição coberta pelo código, sem e2e) |
+| 9 | Conversões | Pixel + CAPI Meta, GA4 MP, Google Ads (opcional), painel de integrações | ✅ código e testes de hash. **Sem validação ao vivo** (faltam IDs/tokens) |
+| 10 | Deploy e QA | Vercel, domínio, teste ponta a ponta no celular | ⏳ push feito; Vercel é com você (ver seção 11) |
 
 As etapas 0 a 6 formam o **MVP vendável**. Cupons, aparência e conversões entram depois sem retrabalho no núcleo.
 
@@ -151,3 +151,26 @@ Exercício: "daqui a um mês o projeto falhou ou travou. Por quê?"
 | 14 | Imagens pesadas deixam a loja lenta | Redimensionar no navegador antes do upload (máx. ~1600px, WebP), bucket público, `next/image` | Assumido |
 | 15 | Envio de dados pessoais às plataformas sem consentimento | Decisão do dono, com interruptor no painel. Inclui uma página simples de "Privacidade" com texto editável | Assumido |
 | 16 | Teste e2e deixa lixo no banco | Dados de teste marcados e removidos ao final de cada rodada | Assumido |
+
+## 11. O que colocar na Vercel quando for para produção
+
+A Vercel é conectada por você ao repositório `fabiombriao/almacampeira` (deploy automático a cada push na `main`). Nada é feito nela por mim.
+
+Em **Project Settings > Environment Variables** (ambiente Production, e Preview se quiser), cadastre exatamente estas 3:
+
+| Nome | Valor | Observação |
+|---|---|---|
+| `SUPABASE_PROJECT_URL` | o mesmo do `.env` (`https://omgnarfsusctavjnkupq.supabase.co`) | público |
+| `SUPABASE_PUBLISHABLE_KEY` | o mesmo do `.env` (`sb_publishable_...`) | público, protegida por RLS |
+| `SUPABASE_API_KEY` | o mesmo do `.env` (`sb_secret_...`) | **secreta, só servidor. Marque como Sensitive** |
+
+Opcional: `NEXT_PUBLIC_SITE_URL` com o endereço final (ex.: `https://www.seudominio.com.br`), usada em sitemap e compartilhamento. Sem ela, o site usa o domínio de produção que a própria Vercel informa.
+
+**Não** cadastre: `SUPABASE_DB_PASSWORD`, `SUPABASE_ANON_PUBLIC_KEY`, `SUPABASE_PROJECT_NAME`, `EMAIL1`, nem nada de `GITHUB_*`. O banco já está pronto (migrations aplicadas), então a Vercel só precisa dessas 3.
+
+Depois de conectar:
+1. Faça o primeiro deploy e abra `/admin/login`. Entre com o e-mail do `EMAIL1` e a senha provisória do arquivo `.admin-credentials.local`. A troca de senha é obrigatória.
+2. Em **Loja e WhatsApp**, cadastre o número real, endereço de retirada e horário (hoje são placeholders).
+3. Em **Produtos**, remova os itens de exemplo e cadastre os reais.
+4. Em **Integrações**, cadastre Pixel/GA4 e tokens. Para testar a Meta, use o código de evento de teste.
+5. Lembrete: Vercel Hobby proíbe uso comercial e Supabase Free pausa por inatividade (ver premortem, riscos 1 e 2).

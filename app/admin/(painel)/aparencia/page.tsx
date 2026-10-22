@@ -5,6 +5,9 @@ import { DEFAULT_THEME, THEME_FIELDS } from '@/lib/theme'
 import type { Banner, StoreSettings } from '@/lib/types'
 import { deleteBannerAction, resetThemeAction, saveBannerAction, saveThemeAction } from './actions'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Aparência' }
 
 function BannerFields({ b }: { b?: Banner }) {

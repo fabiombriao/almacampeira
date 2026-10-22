@@ -145,6 +145,16 @@ public/               logo e estáticos
 - **Checkout:** pede nome e telefone (obrigatórios), e-mail (opcional), forma de pagamento preferida (informativo) e observações. Retirada ou entrega, com endereço só quando for entrega. Inclui página simples de "Privacidade" com texto editável.
 - **Qualidade:** typecheck, lint, build, Vitest e **e2e no navegador embutido do Claude Code** antes de cada push.
 
+## Particularidades deste código (Next.js 16.4)
+
+- **Cache Components ligado** (`cacheComponents: true`): leituras públicas do catálogo usam `"use cache"` + `cacheTag` em `lib/data/catalog.ts`; as ações do admin chamam `updateTag(...)` para a vitrine refletir na hora. Páginas com `params` dinâmicos (produto, categoria, pedido) usam `<Suspense>` + `await params`.
+- `middleware` agora é **`proxy.ts`** (renova a sessão e protege `/admin`). A autorização de verdade está em `requireAdmin()` (`lib/admin/auth.ts`) e no RLS.
+- O painel `/admin` usa `export const instant = false` (sessão por cookie, nunca pré-carregado).
+- Antes de escrever código Next, consulte `node_modules/next/dist/docs/` (a versão difere do que se conhece).
+- `create_order` (RPC) também faz **cotação** com `dry_run: true`, usada pelo checkout para mostrar totais autoritativos.
+- **Pedidos de teste:** nome do cliente começando com `[TESTE]` marca `is_test` e **não dispara conversão**. Use isso no e2e e apague depois (ou rode `npm run db:reset` + `npm run admin:create`).
+- O navegador embutido só hidrata a página com o painel "Browser" **visível**; use `mcp__ccd_view__show_pane` (`preview`) antes do e2e.
+
 ## Ferramentas
 
 - Navegador: o **embutido** do Claude Code (`mcp__Claude_Browser__*`). O Chrome do usuário só se ele pedir.

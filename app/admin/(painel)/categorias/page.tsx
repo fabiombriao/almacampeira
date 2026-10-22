@@ -3,6 +3,9 @@ import { requireAdmin } from '@/lib/admin/auth'
 import type { Category } from '@/lib/types'
 import { deleteCategoryAction, saveCategoryAction } from './actions'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Categorias' }
 
 export default async function CategoriasPage() {

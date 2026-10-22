@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { signOutAction } from '@/app/admin/login/actions'
 import { requireAdmin } from '@/lib/admin/auth'
 
+// Painel autenticado (ver app/admin/layout.tsx): fora da validação de navegação instantânea.
+export const instant = false
+
 const NAV = [
   { href: '/admin', label: 'Início' },
   { href: '/admin/pedidos', label: 'Pedidos' },

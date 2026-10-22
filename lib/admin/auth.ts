@@ -1,9 +1,12 @@
 import 'server-only'
 import { redirect } from 'next/navigation'
+import { connection } from 'next/server'
 import { serverClient } from '@/lib/supabase/server'
 
 /** Data Access Layer do admin: toda página/ação do painel passa por aqui. */
 export async function requireAdmin(options: { allowPasswordChange?: boolean } = {}) {
+  // a verificação do JWT usa a hora atual; marca a renderização como dinâmica (por requisição)
+  await connection()
   const supabase = await serverClient()
   const {
     data: { user },

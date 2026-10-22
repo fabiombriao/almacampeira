@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
+// Painel autenticado: depende de cookies a cada requisição e nunca é pré-carregado, então não faz
+// sentido validar "navegação instantânea" aqui.
+export const instant = false
+
 export const metadata: Metadata = { title: { default: 'Admin', template: '%s | Admin' }, robots: { index: false, follow: false } }
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {

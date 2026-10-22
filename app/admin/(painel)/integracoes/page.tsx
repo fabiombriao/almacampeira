@@ -5,6 +5,9 @@ import { formatDateTime } from '@/lib/format'
 import { serviceClient } from '@/lib/supabase/admin'
 import { savePublicIdsAction, saveSecretsAction } from './actions'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Integrações' }
 
 function SecretField({ name, label, configured, hint }: { name: string; label: string; configured: boolean; hint?: string }) {

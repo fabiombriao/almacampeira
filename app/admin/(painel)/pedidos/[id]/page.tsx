@@ -7,6 +7,9 @@ import type { Order, OrderItem } from '@/lib/types'
 import { formatAddress } from '@/lib/whatsapp'
 import { changeStatusAction } from '../actions'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Pedido' }
 
 function StatusButton({ id, status, label, confirm, danger }: { id: string; status: string; label: string; confirm?: string; danger?: boolean }) {

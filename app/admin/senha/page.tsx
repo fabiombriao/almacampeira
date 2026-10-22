@@ -2,6 +2,8 @@ import { ActionForm } from '@/components/admin/ui'
 import { requireAdmin } from '@/lib/admin/auth'
 import { changePasswordAction } from './actions'
 
+export const instant = false
+
 export const metadata = { title: 'Alterar senha' }
 
 export default async function SenhaPage() {

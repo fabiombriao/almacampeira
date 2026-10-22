@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin/auth'
 import { brl, daysAgoIso, formatDateTime, STATUS_LABEL } from '@/lib/format'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Início' }
 
 export default async function DashboardPage() {

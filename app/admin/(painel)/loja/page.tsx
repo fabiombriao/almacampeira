@@ -4,6 +4,9 @@ import { formatPhone } from '@/lib/format'
 import type { StoreSettings } from '@/lib/types'
 import { saveStoreAction } from './actions'
 
+// Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
+export const instant = false
+
 export const metadata = { title: 'Loja e WhatsApp' }
 
 const VARIABLES: [string, string][] = [
