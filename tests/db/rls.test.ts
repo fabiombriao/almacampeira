@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hasDb, inTransaction, orderPayload, variantId } from './helpers'
+import { backToOwner, hasDb, inTransaction, orderPayload, variantId } from './helpers'
 
 async function asAnon(c: import('pg').Client) {
   await c.query(`select set_config('request.jwt.claims', '{"role":"anon"}', true)`)
@@ -47,10 +47,15 @@ describe.skipIf(!hasDb)('RLS: o visitante (anon) só enxerga a vitrine', () => {
 
   it('produtos inativos não aparecem para o visitante', async () => {
     await inTransaction(async (c) => {
-      await c.query(`update public.products set active = false where slug = 'brinco-flor-dourada-exemplo'`)
+      await variantId(c, 'BRI-UN') // cria os produtos de teste na transação
       await asAnon(c)
-      const r = await c.query(`select count(*)::int as n from public.products where slug = 'brinco-flor-dourada-exemplo'`)
-      expect(r.rows[0].n).toBe(0)
+      const visible = await c.query(`select count(*)::int as n from public.products where slug = 't-brinco'`)
+      expect(visible.rows[0].n).toBe(1)
+      await backToOwner(c)
+      await c.query(`update public.products set active = false where slug = 't-brinco'`)
+      await asAnon(c)
+      const hidden = await c.query(`select count(*)::int as n from public.products where slug = 't-brinco'`)
+      expect(hidden.rows[0].n).toBe(0)
     })
   })
 })

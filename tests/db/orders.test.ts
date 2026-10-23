@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { asAdmin, backToOwner, hasDb, inTransaction, orderPayload, variantId } from './helpers'
+import { asAdmin, backToOwner, hasDb, inTransaction, orderPayload, TEST_COUPON, variantId } from './helpers'
 
 describe.skipIf(!hasDb)('regras de pedido no banco (rollback ao final)', () => {
   it('create_order recalcula preço, taxa de personalização e cupom no servidor', async () => {
@@ -13,7 +13,7 @@ describe.skipIf(!hasDb)('regras de pedido no banco (rollback ao final)', () => {
               { variant_id: kit, quantity: 1, personalization_text: 'João' },
               { variant_id: cuiaP, quantity: 2 },
             ],
-            { coupon_code: 'bemvindo10' },
+            { coupon_code: TEST_COUPON.toLowerCase() },
           ),
         ),
       ])
@@ -68,7 +68,7 @@ describe.skipIf(!hasDb)('regras de pedido no banco (rollback ao final)', () => {
 
       await expect(
         c.query('select public.create_order($1::jsonb)', [
-          JSON.stringify(orderPayload([{ variant_id: brinco, quantity: 1 }], { coupon_code: 'BEMVINDO10' })),
+          JSON.stringify(orderPayload([{ variant_id: brinco, quantity: 1 }], { coupon_code: TEST_COUPON })),
         ]),
       ).rejects.toThrow(/cupom_minimo/) // 59,90 < pedido mínimo 100
     })
