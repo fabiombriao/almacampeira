@@ -7,7 +7,7 @@ import { ImageListEditor } from '@/components/admin/image-uploader'
 import { money } from '@/lib/admin/common'
 import { slugify } from '@/lib/format'
 
-export type VariantDraft = { id?: string; sku: string; options: Record<string, string>; price: string; stock: string; active: boolean }
+export type VariantDraft = { id?: string; sku: string; options: Record<string, string>; price: string; stock: string; active: boolean; images: string[] }
 export type ProductDraft = {
   id?: string
   name: string
@@ -44,7 +44,7 @@ export const EMPTY_DRAFT: ProductDraft = {
   personalization_max_length: '40',
   personalization_fee: '0',
   images: [],
-  variants: [{ sku: '', options: {}, price: '', stock: '0', active: true }],
+  variants: [{ sku: '', options: {}, price: '', stock: '0', active: true, images: [] }],
 }
 
 export function ProductForm({ initial, categories }: { initial: ProductDraft; categories: { id: string; name: string }[] }) {
@@ -90,6 +90,7 @@ export function ProductForm({ initial, categories }: { initial: ProductDraft; ca
           price: money(v.price),
           stock: Number.parseInt(v.stock, 10) || 0,
           active: v.active,
+          images: v.images.filter((url) => d.images.includes(url)),
         })),
       })
       setMessage({ ok: result.ok, text: result.message })
@@ -177,15 +178,41 @@ export function ProductForm({ initial, categories }: { initial: ProductDraft; ca
                   Remover
                 </button>
               )}
+              {d.images.length > 0 && (
+                <div className="sm:col-span-full">
+                  <span className="label">Fotos desta variação (clique para ligar ou desligar)</span>
+                  <ul className="flex flex-wrap gap-2">
+                    {d.images.map((url, n) => {
+                      const on = v.images.includes(url)
+                      return (
+                        <li key={url + n}>
+                          <button
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`Foto ${n + 1}${on ? ' (ligada a esta variação)' : ''}`}
+                            onClick={() => setVariant(i, { images: on ? v.images.filter((u) => u !== url) : [...v.images, url] })}
+                            className={`relative block h-14 w-14 overflow-hidden rounded border-2 ${on ? 'border-primary' : 'border-transparent opacity-60'}`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt="" className="h-full w-full object-cover" />
+                            {on && <span className="absolute right-0 top-0 bg-primary px-1 text-xs text-white">✓</span>}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
         </div>
         {optionNames.length > 0 && (
-          <button type="button" className="btn btn-outline px-4 py-1.5 text-sm" onClick={() => set('variants', [...d.variants, { sku: '', options: {}, price: '', stock: '0', active: true }])}>
+          <button type="button" className="btn btn-outline px-4 py-1.5 text-sm" onClick={() => set('variants', [...d.variants, { sku: '', options: {}, price: '', stock: '0', active: true, images: [] }])}>
             + Adicionar variação
           </button>
         )}
         <p className="text-xs text-ink/60">Sem opções, o produto tem uma única linha de estoque. O preço da variação, quando preenchido, vale no lugar do preço do produto (e da promoção).</p>
+        <p className="text-xs text-ink/60">Fotos: envie todas na galeria do produto (acima) e ligue a cada variação as que são dela. Uma ou várias. Na loja, escolher a variação mostra a foto dela, e clicar numa foto seleciona a variação.</p>
       </section>
 
       <section className="card space-y-4 p-4">

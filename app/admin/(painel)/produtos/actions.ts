@@ -13,6 +13,7 @@ const variantSchema = z.object({
   price: z.number().min(0).max(1_000_000).nullable(),
   stock: z.number().int().min(0).max(1_000_000),
   active: z.boolean(),
+  images: z.array(z.string().url().max(600)).max(10).default([]),
 })
 
 const productSchema = z.object({
@@ -87,6 +88,8 @@ export async function saveProductAction(input: unknown): Promise<SaveProductResu
       price: v.price,
       stock_quantity: v.stock,
       active: v.active,
+      // só vale foto que está na galeria do produto (a galeria é a fonte das imagens)
+      image_urls: v.images.filter((url) => p.images.includes(url)),
       sort_order: index,
     }
     const { error } = v.id

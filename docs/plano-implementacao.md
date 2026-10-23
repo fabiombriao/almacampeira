@@ -34,7 +34,7 @@ Todas as tabelas com RLS ligado. Leitura pública só do que a vitrine precisa; 
 - `categories`: nome, slug, ordem, ativa.
 - `products`: nome, slug, descrição, `category_id`, preço base, preço promocional, ativo, destaque, e configuração de personalização: `allows_personalization` (bool), `personalization_label` (ex.: "Nome a gravar"), `personalization_required` (bool), `personalization_max_length`, `personalization_fee` (valor extra por unidade personalizada; `0` = sem custo, configurável produto a produto).
 - `product_images`: `product_id`, caminho no Storage, ordem.
-- `product_options` / `product_variants`: ex.: Tamanho e Cor. Cada variante tem SKU, valores das opções, preço (opcional, sobrescreve o base), `stock_quantity`, ativo.
+- `product_options` / `product_variants`: ex.: Tamanho e Cor. Cada variante tem SKU, valores das opções, preço (opcional, sobrescreve o base), `stock_quantity`, ativo e `image_urls` (fotos da galeria do produto ligadas a ela, uma ou várias; migration 0005). Na loja o vínculo vale nos dois sentidos: escolher a variação leva à primeira foto dela, e clicar numa foto ligada a uma variação a seleciona (`lib/gallery.ts`, `components/product-selection.tsx`).
 
 **Vendas**
 - `coupons`: código, tipo (`percent` / `fixed`), valor, pedido mínimo, validade, limite de usos, `used_count`, ativo.

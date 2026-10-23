@@ -52,6 +52,8 @@ export type Variant = {
   stock_quantity: number
   active: boolean
   sort_order: number
+  /** URLs (da galeria do produto) ligadas a esta variação */
+  image_urls: string[]
 }
 
 export type ProductImage = { id?: string; url: string; sort_order: number }

@@ -2,19 +2,25 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import { ProductImage } from '@/components/product-image'
+import { useProductSelection } from '@/components/product-selection'
 import { addToCart } from '@/lib/cart'
 import { brl } from '@/lib/format'
+import { productCover, variantCover } from '@/lib/gallery'
 import { cartLineKey, variantLabel, variantOriginalPrice, variantPrice } from '@/lib/pricing'
 import { trackAddToCart, trackViewContent } from '@/lib/tracking/client'
 import type { ProductFull } from '@/lib/types'
 
 export function PurchasePanel({ product }: { product: ProductFull }) {
   const variants = product.variants
-  const firstAvailable = variants.find((v) => v.stock_quantity > 0) ?? variants[0]
-  const [variantId, setVariantId] = useState(firstAvailable?.id ?? '')
+  const { variantId, selectVariant } = useProductSelection()
   const [text, setText] = useState('')
-  const [quantity, setQuantity] = useState(1)
-  const [added, setAdded] = useState(false)
+  // quantidade e aviso "adicionado" valem para a variação em que foram feitos: trocar de variação zera
+  const [qty, setQty] = useState({ variantId, n: 1 })
+  const [addedFor, setAddedFor] = useState<string | null>(null)
+  const quantity = qty.variantId === variantId ? qty.n : 1
+  const added = addedFor === variantId
+  const setQuantity = (update: (current: number) => number) => setQty({ variantId, n: update(quantity) })
 
   const variant = useMemo(() => variants.find((v) => v.id === variantId), [variants, variantId])
   const unit = variant ? variantPrice(product, variant) : Number(product.base_price)
@@ -31,12 +37,6 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id])
 
-  function selectVariant(id: string) {
-    setVariantId(id)
-    setQuantity(1)
-    setAdded(false)
-  }
-
   function onAdd() {
     if (!variant || !canAdd) return
     const personalization = product.allows_personalization && trimmed ? trimmed : null
@@ -47,7 +47,7 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
       slug: product.slug,
       name: product.name,
       variantLabel: variantLabel(variant),
-      image: product.images[0]?.url ?? null,
+      image: variantCover(product, variant.id) ?? productCover(product),
       unitPrice: unit,
       personalizationText: personalization,
       personalizationFee: fee,
@@ -55,7 +55,7 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
       maxStock: stock,
     })
     trackAddToCart({ id: product.id, name: product.name, price: unit + fee, quantity })
-    setAdded(true)
+    setAddedFor(variant.id)
   }
 
   const showChips = variants.length > 1 || (variants[0] && Object.keys(variants[0].option_values).length > 0)
@@ -81,6 +81,7 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
             {variants.map((v) => {
               const soldOut = v.stock_quantity <= 0
               const selected = v.id === variantId
+              const photo = variantCover(product, v.id)
               return (
                 <button
                   key={v.id}
@@ -88,11 +89,16 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
                   disabled={soldOut}
                   onClick={() => selectVariant(v.id)}
                   aria-pressed={selected}
-                  className={`rounded-md border px-4 py-2 text-sm transition-colors ${
+                  className={`rounded-md border text-sm transition-colors ${photo ? 'flex w-24 flex-col items-center gap-1 p-1.5' : 'px-4 py-2'} ${
                     selected ? 'border-primary bg-primary text-white' : 'border-ink/30 bg-white hover:border-primary'
                   } ${soldOut ? 'cursor-not-allowed line-through opacity-40' : ''}`}
                 >
-                  {variantLabel(v) ?? 'Único'}
+                  {photo && (
+                    <span className="relative block aspect-square w-full overflow-hidden rounded bg-dark/10">
+                      <ProductImage src={photo} alt="" sizes="96px" />
+                    </span>
+                  )}
+                  <span>{variantLabel(v) ?? 'Único'}</span>
                   {soldOut && <span className="sr-only"> (esgotado)</span>}
                 </button>
               )
@@ -114,7 +120,7 @@ export function PurchasePanel({ product }: { product: ProductFull }) {
             maxLength={product.personalization_max_length}
             onChange={(e) => {
               setText(e.target.value)
-              setAdded(false)
+              setAddedFor(null)
             }}
             placeholder="Digite aqui"
           />

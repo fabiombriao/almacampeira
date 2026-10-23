@@ -49,6 +49,7 @@ export default async function EditarProdutoPage({ params }: { params: Promise<{ 
         price: v.price != null ? String(v.price).replace('.', ',') : '',
         stock: String(v.stock_quantity),
         active: v.active,
+        images: v.image_urls ?? [],
       })),
   }
 

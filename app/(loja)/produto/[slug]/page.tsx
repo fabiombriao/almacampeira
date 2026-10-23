@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { ProductCard } from '@/components/product-card'
 import { ProductGallery } from '@/components/product-gallery'
+import { ProductSelection } from '@/components/product-selection'
 import { PurchasePanel } from '@/components/purchase-panel'
 import { getProductBySlug, getProducts } from '@/lib/data/catalog'
 import { productPriceInfo } from '@/lib/pricing'
@@ -63,8 +64,9 @@ async function ProdutoContent({ params }: Props) {
           </>
         )}
       </nav>
+      <ProductSelection product={product}>
       <div className="grid gap-8 md:grid-cols-2">
-        <ProductGallery images={product.images.map((i) => i.url)} name={product.name} />
+        <ProductGallery name={product.name} />
         <div>
           <h1 className="font-title text-4xl uppercase leading-tight">{product.name}</h1>
           <div className="mt-4">
@@ -78,6 +80,7 @@ async function ProdutoContent({ params }: Props) {
           )}
         </div>
       </div>
+      </ProductSelection>
 
       {related.length > 0 && (
         <section className="mt-14">
