@@ -47,7 +47,7 @@ export function SingleImageInput({ name, initial, folder, label }: { name: strin
           {error && <p className="text-xs text-red-700">{error}</p>}
         </div>
       </div>
-      <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
+      <input ref={input} type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
     </div>
   )
 }
@@ -101,7 +101,7 @@ export function ImageListEditor({ value, onChange, folder }: { value: string[]; 
         {busy ? 'Enviando…' : 'Adicionar imagens'}
       </button>
       {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
-      <input ref={input} type="file" accept="image/*" multiple className="hidden" onChange={(e) => onPick(e.target.files)} />
+      <input ref={input} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={(e) => onPick(e.target.files)} />
     </div>
   )
 }
