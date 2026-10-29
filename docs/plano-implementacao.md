@@ -178,7 +178,7 @@ Depois de conectar:
 ## 12. Campanha do bazar (link de grupo do WhatsApp)
 
 - Rota `GET /bazar` (`app/bazar/route.ts`): redireciona (302) para o grupo configurado em Admin > Loja (`store_settings.group_url`, migration 0006). Só aceita https do WhatsApp (`lib/group.ts`). Sem link configurado, volta para a home.
-- Evento: **`EntrouNoGrupo`** (personalizado), enviado pelo **servidor** à Meta (CAPI) no momento do clique, porque a pessoa sai do site na hora (`dispatchGroupEvent` em `lib/tracking/server.ts`). Sem dados pessoais: só IP, navegador, `_fbp` e `fbc` (cookie `_fbc` ou montado do `fbclid`).
+- Evento: **`Lead`** (padrão da Meta; um evento personalizado só do servidor demora a ser listado nas campanhas e exige conversão personalizada, e a regra por URL da Meta nunca dispara porque o /bazar não abre página), enviado pelo **servidor** à Meta (CAPI) no momento do clique, porque a pessoa sai do site na hora (`dispatchGroupEvent` em `lib/tracking/server.ts`). Sem dados pessoais: só IP, navegador, `_fbp` e `fbc` (cookie `_fbc` ou montado do `fbclid`).
 - Robôs de pré-visualização (WhatsApp, Facebook, Google) e pedidos HEAD redirecionam mas **não contam**.
 - Cada clique grava uma linha em `tracking_events` (sem pedido); o painel inicial mostra os cliques dos últimos 7 dias.
 - O WhatsApp não avisa quando alguém **entra**: o evento mede o **clique**. Comparar com o crescimento de participantes do grupo.

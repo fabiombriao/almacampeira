@@ -51,7 +51,7 @@ export default async function LojaPage() {
               <label className="label" htmlFor="group_url">Link do grupo de WhatsApp (campanha do bazar)</label>
               <input id="group_url" name="group_url" className="input" defaultValue={s.group_url} placeholder="https://chat.whatsapp.com/..." inputMode="url" />
               <p className="mt-1 text-xs text-ink/60">
-                Use no anúncio o endereço <strong>seusite.com.br/bazar</strong>: o clique é registrado como evento &quot;EntrouNoGrupo&quot; na Meta e a pessoa vai direto para o grupo. Deixe vazio para desativar.
+                Use no anúncio o endereço <strong>seusite.com.br/bazar</strong>: o clique é registrado como evento &quot;Lead&quot; na Meta e a pessoa vai direto para o grupo. Deixe vazio para desativar.
               </p>
             </div>
             <div>

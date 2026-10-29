@@ -1,5 +1,9 @@
-/** Nome do evento enviado à Meta quando alguém clica no link do bazar e é levado ao grupo. */
-export const GROUP_EVENT_NAME = 'EntrouNoGrupo'
+/**
+ * Evento enviado à Meta quando alguém clica no link do bazar e é levado ao grupo.
+ * É o evento PADRÃO "Lead": aparece direto na lista de conversão das campanhas. Um evento personalizado
+ * enviado só pelo servidor demora a ser listado pela Meta e exigiria uma conversão personalizada.
+ */
+export const GROUP_EVENT_NAME = 'Lead'
 
 /** O destino do /bazar só pode ser WhatsApp (https), para o redirecionamento não virar um "redirect aberto". */
 export function isAllowedGroupUrl(value: string): boolean {

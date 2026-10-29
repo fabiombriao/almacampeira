@@ -198,7 +198,7 @@ export type GroupClick = {
 }
 
 /**
- * Clique no link do bazar: manda o evento personalizado "EntrouNoGrupo" à Meta (CAPI) e registra o resultado
+ * Clique no link do bazar: manda o evento padrão "Lead" à Meta (CAPI) e registra o resultado
  * em tracking_events (sem pedido). Roda no servidor porque a pessoa já saiu do site rumo ao WhatsApp.
  * Não há dados pessoais: só IP, navegador e os identificadores de anúncio (fbp/fbc). Nunca lança erro.
  */

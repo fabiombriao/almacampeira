@@ -4,7 +4,7 @@ import { fbcFromClickId, isAllowedGroupUrl, isBotUserAgent } from '@/lib/group'
 import { dispatchGroupEvent } from '@/lib/tracking/server'
 
 /**
- * Link da campanha do bazar: registra o clique (evento "EntrouNoGrupo" na Meta, pelo servidor) e
+ * Link da campanha do bazar: registra o clique (evento "Lead" na Meta, pelo servidor) e
  * redireciona para o grupo de WhatsApp configurado em Admin > Loja.
  */
 export async function GET(request: NextRequest) {
