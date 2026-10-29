@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin/auth'
 import { brl, daysAgoIso, formatDateTime, STATUS_LABEL } from '@/lib/format'
+import { GROUP_EVENT_NAME } from '@/lib/group'
 
 // Painel autenticado: fora da validação de navegação instantânea (ver app/admin/layout.tsx)
 export const instant = false
@@ -12,7 +13,7 @@ export default async function DashboardPage() {
   const since = daysAgoIso(30)
 
   const count = (status: string) => supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', status).eq('is_test', false)
-  const [novo, confirmado, entregue, revenue, recent, lowStock] = await Promise.all([
+  const [novo, confirmado, entregue, revenue, recent, lowStock, groupClicks] = await Promise.all([
     count('novo'),
     count('confirmado'),
     count('entregue'),
@@ -26,6 +27,8 @@ export default async function DashboardPage() {
       .eq('product.active', true)
       .order('stock_quantity')
       .limit(8),
+    // um registro por clique no /bazar (a Meta recebe o mesmo evento pela API de Conversões)
+    supabase.from('tracking_events').select('id', { count: 'exact', head: true }).eq('event_name', GROUP_EVENT_NAME).gte('created_at', daysAgoIso(7)),
   ])
   const total30 = (revenue.data ?? []).reduce((sum, o) => sum + Number(o.total), 0)
 
@@ -34,12 +37,13 @@ export default async function DashboardPage() {
     { label: 'Confirmados', value: confirmado.count ?? 0, href: '/admin/pedidos?status=confirmado' },
     { label: 'Entregues', value: entregue.count ?? 0, href: '/admin/pedidos?status=entregue' },
     { label: 'Vendido em 30 dias', value: brl(total30), href: '/admin/pedidos' },
+    { label: 'Cliques no grupo (7 dias)', value: groupClicks.count ?? 0, href: '/admin/loja' },
   ]
 
   return (
     <div className="space-y-8">
       <h1 className="font-title text-4xl uppercase">Início</h1>
-      <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {cards.map((c) => (
           <li key={c.label}>
             <Link href={c.href} className={`card block p-4 hover:shadow-md ${c.highlight ? 'border-primary bg-primary/5' : ''}`}>

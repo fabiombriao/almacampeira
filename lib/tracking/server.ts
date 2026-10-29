@@ -2,6 +2,7 @@ import 'server-only'
 import crypto from 'node:crypto'
 import { serviceClient } from '@/lib/supabase/admin'
 import { toInternationalPhone } from '@/lib/format'
+import { GROUP_EVENT_NAME } from '@/lib/group'
 import type { Order, OrderItem } from '@/lib/types'
 
 export type EventKind = 'InitiateCheckout' | 'Purchase'
@@ -186,6 +187,54 @@ async function sendGoogleAds(kind: EventKind, order: Order, s: Secrets): Promise
   })
   const text = (await res.text()).slice(0, 300)
   return { platform: 'google_ads', status: res.ok ? 'sent' : 'failed', detail: `HTTP ${res.status} ${text}` }
+}
+
+export type GroupClick = {
+  ip?: string
+  userAgent?: string
+  fbp?: string
+  fbc?: string
+  sourceUrl: string
+}
+
+/**
+ * Clique no link do bazar: manda o evento personalizado "EntrouNoGrupo" à Meta (CAPI) e registra o resultado
+ * em tracking_events (sem pedido). Roda no servidor porque a pessoa já saiu do site rumo ao WhatsApp.
+ * Não há dados pessoais: só IP, navegador e os identificadores de anúncio (fbp/fbc). Nunca lança erro.
+ */
+export async function dispatchGroupEvent(click: GroupClick): Promise<void> {
+  const db = serviceClient()
+  const record = (o: Outcome) => db.from('tracking_events').insert({ order_id: null, platform: o.platform, event_name: GROUP_EVENT_NAME, status: o.status, detail: o.detail })
+  try {
+    const [settingsRes, secretsRes] = await Promise.all([
+      db.from('store_settings').select('meta_pixel_id').eq('id', 1).single(),
+      db.from('integration_secrets').select('meta_capi_token, meta_test_event_code, dry_run').eq('id', 1).single(),
+    ])
+    const pixelId = (settingsRes.data as { meta_pixel_id: string | null } | null)?.meta_pixel_id ?? null
+    const s = secretsRes.data as Pick<Secrets, 'meta_capi_token' | 'meta_test_event_code' | 'dry_run'> | null
+    if (!pixelId || !s?.meta_capi_token) return void (await record({ platform: 'meta', status: 'skipped', detail: 'Pixel ID ou token da CAPI não cadastrados' }))
+    if (s.dry_run) return void (await record({ platform: 'meta', status: 'dry_run', detail: `Modo de teste: ${GROUP_EVENT_NAME} não enviado` }))
+
+    const event = {
+      event_name: GROUP_EVENT_NAME,
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: crypto.randomUUID(),
+      action_source: 'website',
+      event_source_url: click.sourceUrl,
+      user_data: compact({ client_ip_address: click.ip, client_user_agent: click.userAgent, fbp: click.fbp, fbc: click.fbc }),
+      custom_data: { content_name: 'bazar', content_category: 'grupo_whatsapp' },
+    }
+    const res = await fetch(`https://graph.facebook.com/${META_API_VERSION}/${pixelId}/events?access_token=${encodeURIComponent(s.meta_capi_token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [event], ...(s.meta_test_event_code ? { test_event_code: s.meta_test_event_code } : {}) }),
+      signal: AbortSignal.timeout(10000),
+    })
+    const text = (await res.text()).slice(0, 300)
+    await record({ platform: 'meta', status: res.ok ? 'sent' : 'failed', detail: `HTTP ${res.status} ${text}` })
+  } catch (error) {
+    console.error('dispatchGroupEvent falhou', error)
+  }
 }
 
 /**

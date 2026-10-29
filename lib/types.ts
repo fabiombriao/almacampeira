@@ -18,6 +18,8 @@ export type StoreSettings = {
   pickup_address: string
   delivery_note: string
   instagram_url: string
+  /** Convite do grupo de WhatsApp para onde a rota /bazar redireciona */
+  group_url: string
   about_text: string
   privacy_text: string
   theme: Theme

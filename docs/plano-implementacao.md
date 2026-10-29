@@ -174,3 +174,12 @@ Depois de conectar:
 3. Em **Produtos**, remova os itens de exemplo e cadastre os reais.
 4. Em **Integrações**, cadastre Pixel/GA4 e tokens. Para testar a Meta, use o código de evento de teste.
 5. Lembrete: Vercel Hobby proíbe uso comercial e Supabase Free pausa por inatividade (ver premortem, riscos 1 e 2).
+
+## 12. Campanha do bazar (link de grupo do WhatsApp)
+
+- Rota `GET /bazar` (`app/bazar/route.ts`): redireciona (302) para o grupo configurado em Admin > Loja (`store_settings.group_url`, migration 0006). Só aceita https do WhatsApp (`lib/group.ts`). Sem link configurado, volta para a home.
+- Evento: **`EntrouNoGrupo`** (personalizado), enviado pelo **servidor** à Meta (CAPI) no momento do clique, porque a pessoa sai do site na hora (`dispatchGroupEvent` em `lib/tracking/server.ts`). Sem dados pessoais: só IP, navegador, `_fbp` e `fbc` (cookie `_fbc` ou montado do `fbclid`).
+- Robôs de pré-visualização (WhatsApp, Facebook, Google) e pedidos HEAD redirecionam mas **não contam**.
+- Cada clique grava uma linha em `tracking_events` (sem pedido); o painel inicial mostra os cliques dos últimos 7 dias.
+- O WhatsApp não avisa quando alguém **entra**: o evento mede o **clique**. Comparar com o crescimento de participantes do grupo.
+- Usar no anúncio: `https://<site>/bazar`.
